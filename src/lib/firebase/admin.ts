@@ -16,7 +16,6 @@ let _initialized = false;
 
 function initialize() {
   if (_initialized) return;
-  _initialized = true;
 
   const { initializeApp, getApps, cert, getApp } = require("firebase-admin/app");
   const { getAuth } = require("firebase-admin/auth");
@@ -27,7 +26,19 @@ function initialize() {
     : (() => {
         const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
         if (key) {
-          return initializeApp({ credential: cert(JSON.parse(key)) });
+          try {
+            let serviceAccount = JSON.parse(key);
+            if (typeof serviceAccount === "string") {
+              serviceAccount = JSON.parse(serviceAccount);
+            }
+            if (serviceAccount.private_key) {
+              serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+            }
+            return initializeApp({ credential: cert(serviceAccount) });
+          } catch (err: any) {
+            console.error("Firebase Admin initialization via SERVICE_ACCOUNT_KEY failed:", err);
+            throw new Error(`Firebase Admin Service Account Key JSON.parse failed: ${err?.message}`);
+          }
         }
         const projectId = process.env.FIREBASE_PROJECT_ID;
         const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -43,6 +54,7 @@ function initialize() {
 
   _auth = getAuth(app);
   _db = getFirestore(app);
+  _initialized = true;
 }
 
 export function getAdminDb(): Firestore {
