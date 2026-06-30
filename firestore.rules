@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── /config/{docId} ────────────────────────────────────────────────────
+    // Public read — powers the event status display
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if false; // only Admin SDK can write
+    }
+
+    // ─── /events/{eventId} ──────────────────────────────────────────────────
+    // Public read — slot counts, status, week label
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if false; // only Admin SDK can write
+
+      // ─── /events/{eventId}/registrations/{regId} ────────────────────────
+      // Public read — player names list (no sensitive data, just names)
+      // All writes are blocked client-side; only Admin SDK Route Handlers write
+      match /registrations/{regId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+
+    // ─── /users/{uid} ───────────────────────────────────────────────────────
+    // Locked down — no longer used but kept for safety
+    match /users/{uid} {
+      allow read, write: if false;
+    }
+  }
+}
