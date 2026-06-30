@@ -1,12 +1,10 @@
 /**
  * Firebase Admin SDK — SERVER-SIDE ONLY.
- *
- * Pattern: defer initialization to a lazy getter so the module can be imported
- * without crashing during `next build` type-checking phase.
- * The `export const dynamic = 'force-dynamic'` on each route ensures this only
- * runs at request time in production.
  */
 
+import { initializeApp, getApps, cert, getApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 import type { Firestore } from "firebase-admin/firestore";
 import type { Auth } from "firebase-admin/auth";
 
@@ -16,10 +14,6 @@ let _initialized = false;
 
 function initialize() {
   if (_initialized) return;
-
-  const { initializeApp, getApps, cert, getApp } = require("firebase-admin/app");
-  const { getAuth } = require("firebase-admin/auth");
-  const { getFirestore } = require("firebase-admin/firestore");
 
   const app = getApps().length > 0
     ? getApp()
