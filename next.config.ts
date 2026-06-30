@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   },
 
   // Suppress Firebase Admin dynamic require warnings
-  serverExternalPackages: ["firebase-admin"],
+  serverExternalPackages: ["firebase-admin", "jose", "jwks-rsa"],
 };
 
 export default nextConfig;
